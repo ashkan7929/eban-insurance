@@ -1,10 +1,38 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/database/prisma.service';
-import { CreateQuoteDto } from './dto/create-quote.dto';
-import { UpdateQuoteDto } from './dto/update-quote.dto';
-import { products } from '../../products/index';
-import { notFound, forbidden, badRequest } from '../../shared/errors/AppError';
+import { PrismaService } from '../../infrastructure/database/prisma.service.js';
+import { CreateQuoteDto } from './dto/create-quote.dto.js';
+import { UpdateQuoteDto } from './dto/update-quote.dto.js';
+import { products } from '../../products/index.js';
+import { notFound, forbidden, badRequest } from '../../shared/errors/AppError.js';
 import { Prisma } from '@prisma/client';
+
+function toDecimalSafe(value: string | number | Prisma.Decimal | null | undefined): Prisma.Decimal {
+  if (value === null || value === undefined) {
+    return new Prisma.Decimal(0);
+  }
+  if (typeof value === 'object' && 'toString' in Object(value)) {
+    const numeric = Number(value.toString());
+    return new Prisma.Decimal(Number.isFinite(numeric) ? numeric : 0);
+  }
+  const numeric = Number(value);
+  return new Prisma.Decimal(Number.isFinite(numeric) ? numeric : 0);
+}
+
+function flattenData(data: Record<string, any>): Record<string, any> {
+  if (!data) return {};
+  const nestedKeys = ['vehicle', 'insurance', 'customer', 'insured', 'coverage', 'trip', 'travelers'];
+  const hasNested = nestedKeys.some((k) => data[k] && typeof data[k] === 'object');
+  if (!hasNested) return data;
+  const flat: Record<string, any> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (value && typeof value === 'object' && !Array.isArray(value) && nestedKeys.includes(key)) {
+      Object.assign(flat, value);
+    } else {
+      flat[key] = value;
+    }
+  }
+  return flat;
+}
 
 @Injectable()
 export class QuotesService {
@@ -16,7 +44,9 @@ export class QuotesService {
       throw notFound(`Product with slug "${dto.productSlug}" not found`);
     }
 
-    const { amount } = product.calculateQuote(dto.data);
+    const flatData = flattenData(dto.data);
+    const calculated = product.calculateQuote(flatData);
+    const finalAmount = dto.amount && dto.amount > 0 ? Number(dto.amount) : Number(calculated.amount);
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
 
     return this.prisma.quote.create({
@@ -24,8 +54,8 @@ export class QuotesService {
         user_id: userId,
         product_slug: dto.productSlug,
         status: 'DRAFT',
-        data_json: dto.data,
-        amount: new Prisma.Decimal(amount),
+        data_json: flatData,
+        amount: toDecimalSafe(finalAmount),
         expires_at: expiresAt,
       },
     });
@@ -61,7 +91,7 @@ export class QuotesService {
     }
 
     if (dto.amount !== undefined) {
-      updateData.amount = new Prisma.Decimal(dto.amount);
+      updateData.amount = toDecimalSafe(dto.amount);
     }
 
     if (dto.status !== undefined) {

@@ -1,19 +1,19 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
-import { PrismaModule } from './infrastructure/database/prisma.module';
-import { HealthModule } from './modules/health/health.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { ProductsModule } from './modules/products/products.module';
-import { QuotesModule } from './modules/quotes/quotes.module';
-import { OrdersModule } from './modules/orders/orders.module';
-import { PaymentsModule } from './modules/payments/payments.module';
-import { DocumentsModule } from './modules/documents/documents.module';
-import { PoliciesModule } from './modules/policies/policies.module';
-import { TrackingModule } from './modules/tracking/tracking.module';
-import { AdminModule } from './modules/admin/admin.module';
-import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
-import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
+import { PrismaModule } from './infrastructure/database/prisma.module.js';
+import { HealthModule } from './modules/health/health.module.js';
+import { AuthModule } from './modules/auth/auth.module.js';
+import { ProductsModule } from './modules/products/products.module.js';
+import { QuotesModule } from './modules/quotes/quotes.module.js';
+import { OrdersModule } from './modules/orders/orders.module.js';
+import { PaymentsModule } from './modules/payments/payments.module.js';
+import { DocumentsModule } from './modules/documents/documents.module.js';
+import { PoliciesModule } from './modules/policies/policies.module.js';
+import { TrackingModule } from './modules/tracking/tracking.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard.js';
+import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter.js';
 
 @Module({
   imports: [

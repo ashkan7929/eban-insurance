@@ -21,6 +21,7 @@ export class TrackingService {
         payments: true,
         documents: true,
         policy: true,
+        quote: true,
       },
     });
 
@@ -39,18 +40,23 @@ export class TrackingService {
       throw badRequest('Mobile number does not match order');
     }
 
-    const timeline = this.buildTimeline(order);
+    const timeline = this.buildLegacyTimeline(order);
+    const steps = this.buildFrontendTimeline(order);
 
     return {
       orderNumber: order.order_number,
+      productSlug: order.quote?.product_slug ?? 'third-party',
       status: order.status,
+      amount: Number(order.amount),
       createdAt: order.created_at,
+      steps,
       timeline,
     };
   }
 
-  private buildTimeline(order: any) {
-    const steps: { step: string; status: 'completed' | 'pending'; date?: Date }[] = [];
+  private buildLegacyTimeline(order: any) {
+    type StepStatus = 'completed' | 'pending';
+    const steps: { step: string; status: StepStatus; date?: Date }[] = [];
 
     steps.push({
       step: 'Order Created',
@@ -77,6 +83,41 @@ export class TrackingService {
     steps.push({
       step: 'Policy Issued',
       status: hasPolicy ? 'completed' : 'pending',
+      date: order.policy?.created_at ?? undefined,
+    });
+
+    return steps;
+  }
+
+  private buildFrontendTimeline(order: any) {
+    type StepStatus = 'done' | 'current' | 'pending';
+    const steps: { label: string; status: StepStatus; date?: Date }[] = [];
+
+    steps.push({
+      label: 'ثبت درخواست',
+      status: 'done',
+      date: order.created_at,
+    });
+
+    const hasDocuments = order.documents && order.documents.length > 0;
+    steps.push({
+      label: 'تکمیل مدارک',
+      status: hasDocuments ? 'done' : 'current',
+      date: hasDocuments ? order.documents[0].created_at : undefined,
+    });
+
+    const hasPaidPayment = order.payments && order.payments.some((p: any) => p.status === 'PAID');
+    const paidPayment = order.payments?.find((p: any) => p.status === 'PAID');
+    steps.push({
+      label: 'پرداخت',
+      status: hasPaidPayment ? 'done' : 'pending',
+      date: paidPayment?.paid_at ?? undefined,
+    });
+
+    const hasPolicy = !!order.policy;
+    steps.push({
+      label: 'صدور بیمه‌نامه',
+      status: hasPolicy ? 'done' : 'pending',
       date: order.policy?.created_at ?? undefined,
     });
 

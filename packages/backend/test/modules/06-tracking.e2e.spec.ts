@@ -9,7 +9,7 @@ import {
   createQuoteFor,
   createOrderForQuote,
   THIRD_PARTY_DATA,
-} from '../helpers';
+} from '../helpers.js';
 
 describe('tracking (e2e)', () => {
   let app: NestExpressApplication;

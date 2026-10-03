@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createNestApp } from './helpers';
+import { createNestApp } from './helpers.js';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 

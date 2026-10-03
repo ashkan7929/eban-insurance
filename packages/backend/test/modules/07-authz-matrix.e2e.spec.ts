@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 import { UserRole } from '@prisma/client';
-import { createNestApp, prismaTestClient, loginAs } from '../helpers';
+import { createNestApp, prismaTestClient, loginAs } from '../helpers.js';
 
 type AuthType = 'none' | 'USER' | 'ADMIN';
 type EndpointCase = [string, string, AuthType, number, Record<string, any>?];

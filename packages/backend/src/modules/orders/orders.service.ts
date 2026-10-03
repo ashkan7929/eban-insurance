@@ -1,9 +1,21 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { PrismaService } from '../../infrastructure/database/prisma.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { notFound, badRequest, forbidden } from '../../shared/errors/AppError';
-import { generateOrderNumber } from '../../shared/utils/generators';
+import { PrismaService } from '../../infrastructure/database/prisma.service.js';
+import { CreateOrderDto } from './dto/create-order.dto.js';
+import { notFound, badRequest, forbidden } from '../../shared/errors/AppError.js';
+import { generateOrderNumber } from '../../shared/utils/generators.js';
 import { Prisma } from '@prisma/client';
+
+function toDecimalSafe(value: string | number | Prisma.Decimal | null | undefined): Prisma.Decimal {
+  if (value === null || value === undefined) {
+    return new Prisma.Decimal(0);
+  }
+  if (typeof value === 'object' && 'toString' in Object(value)) {
+    const numeric = Number(value.toString());
+    return new Prisma.Decimal(Number.isFinite(numeric) ? numeric : 0);
+  }
+  const numeric = Number(value);
+  return new Prisma.Decimal(Number.isFinite(numeric) ? numeric : 0);
+}
 
 @Injectable()
 export class OrdersService {
@@ -40,7 +52,7 @@ export class OrdersService {
           quote_id: quote.id,
           order_number: orderNumber,
           status: 'DRAFT',
-          amount: new Prisma.Decimal(quote.amount.toString()),
+          amount: toDecimalSafe(quote.amount),
         },
       });
 

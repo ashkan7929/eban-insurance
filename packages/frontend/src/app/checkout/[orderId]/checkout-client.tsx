@@ -10,6 +10,7 @@ import { OtpLoginModal } from '@/components/auth/otp-login-modal';
 import { useAuthStore } from '@/store/auth-store';
 import { usePurchaseStore } from '@/store/purchase-store';
 import { products } from '@/config/products';
+import api from '@/lib/api';
 import {
   CreditCard,
   Shield,
@@ -88,14 +89,35 @@ export function CheckoutClient({ orderId }: CheckoutClientProps) {
 
     setIsProcessing(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const createPaymentRes = await api.post(`/orders/${effectiveOrderId}/payment`, {
+        gateway: selectedGateway.toUpperCase(),
+      });
+      const paymentId = createPaymentRes.data?.paymentId;
+
+      if (!paymentId) {
+        throw new Error('شناسه پرداخت دریافت نشد');
+      }
+
+      try {
+        await api.get(`/payments/callback?paymentId=${encodeURIComponent(paymentId)}`);
+      } catch (_callbackErr) {
+      }
 
       const finalOrderNumber = orderNumber || effectiveOrderId;
-      const redirectUrl = `/payment/success?orderId=${encodeURIComponent(effectiveOrderId)}&status=success&orderNo=${encodeURIComponent(finalOrderNumber)}`;
+      const redirectUrl = `/payment/success?orderId=${encodeURIComponent(effectiveOrderId)}&status=success&orderNo=${encodeURIComponent(finalOrderNumber)}&paymentId=${encodeURIComponent(paymentId)}`;
 
-      router.push(redirectUrl);
+      setTimeout(() => {
+        resetPurchase();
+        router.push(redirectUrl);
+      }, 300);
     } catch (e: any) {
-      setError(e?.message || 'در اتصال به درگاه پرداخت مشکلی پیش آمد');
+      const msg =
+        e?.response?.data?.message ||
+        e?.message ||
+        'در اتصال به درگاه پرداخت مشکلی پیش آمد';
+      setError(msg);
+      const failUrl = `/payment/failed?orderId=${encodeURIComponent(effectiveOrderId)}`;
+      setTimeout(() => router.push(failUrl), 1200);
     } finally {
       setIsProcessing(false);
     }

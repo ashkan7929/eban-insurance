@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
-import { createNestApp, prismaTestClient, THIRD_PARTY_DATA, BODY_DATA, LIFE_DATA, TRAVEL_DATA } from '../helpers';
+import { createNestApp, prismaTestClient, THIRD_PARTY_DATA, BODY_DATA, LIFE_DATA, TRAVEL_DATA } from '../helpers.js';
 
 describe('products (e2e)', () => {
   let app: NestExpressApplication;

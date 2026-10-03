@@ -1,13 +1,13 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
-import { PrismaService } from '../../infrastructure/database/prisma.service';
+import type { User } from '@prisma/client';
+import { PrismaService } from '../../infrastructure/database/prisma.service.js';
 import {
   generateNumericOtp,
   normalizeMobile,
   isValidIranianMobile,
-} from '../../shared/utils/generators';
-import { badRequest, unauthorized } from '../../shared/errors/AppError';
+} from '../../shared/utils/generators.js';
+import { badRequest, unauthorized } from '../../shared/errors/AppError.js';
 
 export interface AuthResponse {
   accessToken: string;
