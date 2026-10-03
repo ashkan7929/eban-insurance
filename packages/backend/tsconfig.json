@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "types": ["node", "multer", "express"],
+    "noEmit": false,
+    "incremental": false,
+    "tsBuildInfoFile": null
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "prisma/**/*.ts", "test/**/*.ts"]
+}

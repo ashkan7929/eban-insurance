@@ -1,0 +1,20 @@
+{
+  "name": "eban-insurance",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter \"./packages/*\" run dev",
+    "dev:backend": "pnpm --filter backend run dev",
+    "dev:frontend": "pnpm --filter frontend run dev",
+    "build": "pnpm -r run build",
+    "build:backend": "pnpm --filter backend run build",
+    "build:frontend": "pnpm --filter frontend run build",
+    "lint": "pnpm -r run lint",
+    "db:migrate": "pnpm --filter backend run db:migrate",
+    "db:generate": "pnpm --filter backend run db:generate",
+    "db:push": "pnpm --filter backend run db:push",
+    "db:seed": "pnpm --filter backend run db:seed",
+    "db:studio": "pnpm --filter backend run db:studio"
+  }
+}

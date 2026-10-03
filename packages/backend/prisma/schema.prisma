@@ -1,0 +1,110 @@
+// Prisma schema for Eban Insurance
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(uuid())
+  mobile        String    @unique
+  first_name    String?
+  last_name     String?
+  national_code String?   @unique
+  birth_date    DateTime?
+  role          UserRole  @default(USER)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  quotes Quote[]
+  orders Order[]
+}
+
+model OtpCode {
+  id         String   @id @default(uuid())
+  mobile     String
+  code       String
+  expires_at DateTime
+  used_at    DateTime?
+  created_at DateTime @default(now())
+
+  @@index([mobile, created_at])
+}
+
+model Quote {
+  id           String   @id @default(uuid())
+  user_id      String?
+  product_slug String
+  status       String   @default("DRAFT")
+  data_json    Json
+  amount       Decimal  @db.Decimal(30, 10)
+  expires_at   DateTime
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user  User?   @relation(fields: [user_id], references: [id])
+  order Order?
+}
+
+model Order {
+  id           String   @id @default(uuid())
+  user_id      String?
+  quote_id     String?  @unique
+  order_number String   @unique
+  status       String   @default("DRAFT")
+  amount       Decimal  @db.Decimal(30, 10)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  user     User?             @relation(fields: [user_id], references: [id])
+  quote    Quote?            @relation(fields: [quote_id], references: [id])
+  payments Payment[]
+  documents Document[]
+  policy   InsurancePolicy?
+}
+
+model Payment {
+  id             String   @id @default(uuid())
+  order_id       String
+  amount         Decimal  @db.Decimal(30, 10)
+  gateway        String
+  authority      String?
+  transaction_id String?
+  status         String   @default("PENDING")
+  paid_at        DateTime?
+  created_at     DateTime @default(now())
+
+  order Order @relation(fields: [order_id], references: [id])
+}
+
+model Document {
+  id         String   @id @default(uuid())
+  order_id   String
+  type       String
+  file_url   String
+  status     String   @default("PENDING")
+  created_at DateTime @default(now())
+
+  order Order @relation(fields: [order_id], references: [id])
+}
+
+model InsurancePolicy {
+  id            String   @id @default(uuid())
+  order_id      String   @unique
+  policy_number String?
+  status        String   @default("PENDING")
+  start_date    DateTime?
+  end_date      DateTime?
+  file_url      String?
+  created_at    DateTime @default(now())
+
+  order Order @relation(fields: [order_id], references: [id])
+}

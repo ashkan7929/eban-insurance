@@ -1,0 +1,27 @@
+{
+  "pages": [
+    {
+      "path": "/",
+      "ttfbMs": 41,
+      "fcpMs": 178,
+      "lcpMs": 0,
+      "totalTransferBytes": 2613762
+    },
+    {
+      "path": "/quote/third-party",
+      "ttfbMs": 85,
+      "fcpMs": 233,
+      "lcpMs": 0,
+      "totalTransferBytes": 3044342
+    },
+    {
+      "path": "/dashboard/orders",
+      "ttfbMs": 29,
+      "fcpMs": 243,
+      "lcpMs": 0,
+      "totalTransferBytes": 3649015
+    }
+  ],
+  "generatedAt": "2026-10-01T20:41:14.791Z",
+  "baseUrl": "http://localhost:3000"
+}
